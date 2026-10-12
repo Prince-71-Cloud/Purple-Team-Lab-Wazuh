@@ -1,0 +1,48 @@
+# ──────────────────────────────────────────────
+# Secrets & environment-specific values — NEVER commit
+# ──────────────────────────────────────────────
+*.env
+.env
+secrets*
+*secret*
+*password*
+*credentials*
+*.key
+*.pem
+*.crt
+*.p12
+# Real (non-example) Wazuh configs that may contain IPs/keys
+ossec.conf
+agent-auth.*
+client.keys
+local_internal_options.conf
+
+# ──────────────────────────────────────────────
+# Wazuh / logs / captures
+# ──────────────────────────────────────────────
+*.log
+alerts.json
+archives.json
+*.pcap
+*.pcapng
+
+# ──────────────────────────────────────────────
+# OS / editor noise
+# ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# ──────────────────────────────────────────────
+# Build artifacts
+# ──────────────────────────────────────────────
+__pycache__/
+*.pyc
+node_modules/
+
+# NOTE: Keep *.example and *-notes files — those are the sanitized versions
+# meant to be published. Only the real, unsanitized files are ignored above.

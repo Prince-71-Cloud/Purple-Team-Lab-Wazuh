@@ -1,0 +1,48 @@
+<!--
+  SANITIZED EXCERPT — Wazuh agent configuration (Ubuntu Server)
+
+  Real file location on the agent:
+      /var/ossec/etc/ossec.conf
+
+  This is NOT the full file. It shows only the pieces relevant to this lab:
+    1. The manager address the agent reports to.
+    2. The Apache access-log source added so web attacks become visible.
+
+  Replace <MANAGER_IP> with your own manager address. Do not commit the real
+  ossec.conf (it is listed in .gitignore).
+-->
+
+<ossec_config>
+
+  <!-- Where this agent ships its telemetry -->
+  <client>
+    <server>
+      <address><MANAGER_IP></address>
+      <port>1514</port>
+      <protocol>tcp</protocol>
+    </server>
+  </client>
+
+  <!--
+    Apache access log.
+    Added explicitly: Wazuh monitors the Linux auth log by default (which gives
+    SSH brute-force detection for free), but the web-server log is NOT monitored
+    out of the box. Without this block, DVWA attacks generate no alerts.
+  -->
+  <localfile>
+    <log_format>apache</log_format>
+    <location>/var/log/apache2/access.log</location>
+  </localfile>
+
+  <!-- The Linux auth log is typically already present in the default config: -->
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/auth.log</location>
+  </localfile>
+
+</ossec_config>
+
+<!--
+  After editing, restart the AGENT so it picks up the new log source:
+      sudo systemctl restart wazuh-agent
+-->

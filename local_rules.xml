@@ -1,0 +1,68 @@
+<!--
+  Custom detection rules for the Wazuh Purple-Team Lab.
+
+  Location on the MANAGER (not the agent):
+      /var/ossec/etc/rules/local_rules.xml
+
+  Deploy:
+      sudo cp rules/local_rules.xml /var/ossec/etc/rules/local_rules.xml
+      sudo /var/ossec/bin/wazuh-logtest        # validate FIRST
+      sudo systemctl restart wazuh-manager      # then load
+
+  Convention:
+      - Custom rule IDs use the reserved 100000+ range so they never
+        collide with Wazuh's built-in ruleset.
+      - Each rule carries a <mitre> block mapping it to ATT&CK.
+-->
+
+<group name="local,web,attack,">
+
+  <!--
+    Rule 100100 — Path traversal targeting /etc/passwd
+
+    Built on top of the web-accesslog decoder. Wazuh's generic rule 31104
+    ("Common web attack") fires at level 6 for this payload; this rule
+    escalates the specific /etc/passwd traversal to a high-severity,
+    attacker-attributed detection at level 12.
+
+    Example trigger (from Kali):
+      curl "http://<AGENT_IP>/dvwa/vulnerabilities/fi/?page=../../../../etc/passwd"
+
+    ATT&CK: T1083 — File and Directory Discovery
+  -->
+  <rule id="100100" level="12">
+    <if_group>web</if_group>
+    <url>etc/passwd</url>
+    <description>Path traversal attempt targeting /etc/passwd from $(srcip)</description>
+    <mitre>
+      <id>T1083</id>
+    </mitre>
+    <group>pci_dss_6.5,</group>
+  </rule>
+
+  <!--
+    ─────────────────────────────────────────────────────────────────────
+    ROADMAP / TEMPLATE RULES (not yet validated — add and logtest before use)
+    ─────────────────────────────────────────────────────────────────────
+
+    The entries below are starting points for the next detections on the
+    roadmap. Uncomment, adapt, and validate each one with wazuh-logtest
+    before deploying. Replace the match conditions with patterns you have
+    actually confirmed against a real log line.
+
+    <rule id="100101" level="12">
+      <if_group>web</if_group>
+      <url>../</url>
+      <description>Generic path traversal pattern (../) from $(srcip)</description>
+      <mitre><id>T1083</id></mitre>
+    </rule>
+
+    <rule id="100102" level="10">
+      <if_group>web</if_group>
+      <regex>\.php\?cmd=|/shell\.php|/c99\.php|/r57\.php</regex>
+      <description>Possible web-shell access attempt from $(srcip)</description>
+      <mitre><id>T1505.003</id></mitre>
+    </rule>
+  -->
+
+</group>
