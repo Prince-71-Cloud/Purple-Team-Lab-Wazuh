@@ -1,3 +1,7 @@
+<video src="./wazuh-attack-to-alert.mp4" controls width="100%">
+  Your browser does not support the video tag.
+</video>
+
 # Wazuh Purple-Team Detection Lab
 
 ![Wazuh](https://img.shields.io/badge/SIEM-Wazuh%204.14-blue)
