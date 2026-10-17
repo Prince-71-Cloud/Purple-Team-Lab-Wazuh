@@ -1,6 +1,7 @@
-<video src="./wazuh-attack-to-alert.mp4" controls width="100%">
-  Your browser does not support the video tag.
-</video>
+
+https://github.com/user-attachments/assets/60663711-0f53-4d65-a49e-9209f322037e
+
+
 
 # Wazuh Purple-Team Detection Lab
 
