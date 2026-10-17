@@ -1,0 +1,9 @@
+#!/bin/sh
+# Wrapper the Wazuh integrator calls. It runs the Python script with Wazuh's
+# bundled interpreter. The exact path varies by version/build:
+#   - Wazuh 4.12+ (newer):   /var/ossec/venv/bin/python3
+#   - Many 4.x installs:     /var/ossec/framework/python/bin/python3
+# Use whichever exists on YOUR manager (check with:  ls /var/ossec/*/bin/python3 ).
+# Using the bundled interpreter avoids installing the 'requests' module separately.
+
+/var/ossec/framework/python/bin/python3 /var/ossec/integrations/custom-telegram.py "$@"

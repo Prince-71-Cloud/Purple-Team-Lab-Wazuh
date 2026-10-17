@@ -1,0 +1,18 @@
+<!--
+  SANITIZED SNIPPET — add inside <ossec_config> in the MANAGER's
+  /var/ossec/etc/ossec.conf, then restart:  sudo systemctl restart wazuh-manager
+
+  Replace <BOT_TOKEN> with your bot token from @BotFather.
+  Do NOT commit the real ossec.conf (it is listed in .gitignore).
+
+  <level>10</level>  -> only alerts at level 10+ are pushed to Telegram.
+  This keeps routine noise (e.g. level-6 web events) off your phone while still
+  delivering the SSH brute force (rule 5712, level 10) and the custom path-
+  traversal rule (100100, level 12). Lower the number to receive more.
+-->
+<integration>
+  <name>custom-telegram</name>
+  <hook_url>https://api.telegram.org/bot&lt;BOT_TOKEN&gt;/sendMessage</hook_url>
+  <level>10</level>
+  <alert_format>json</alert_format>
+</integration>

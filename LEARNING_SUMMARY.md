@@ -3,7 +3,7 @@
 > A hands-on project write-up. Built from a bare Wazuh install to a working
 > detection-engineering loop, mapped to MITRE ATT&CK.
 >
-> _Author: <YOUR NAME> · Role background: Security Engineer / Red Team / Bug Bounty_
+> _Author: **Md Aman Bhuiyan** — Security Engineer, Vivasoft Limited · Red Team & Bug Bounty background_
 
 ---
 
@@ -76,7 +76,26 @@ discipline, not just a lab trick.
 
 ---
 
-## 5. Key takeaways
+## 5. Real-time Telegram alerting
+
+To make the lab feel operational, I added real-time alerting to a Telegram bot through Wazuh's
+`wazuh-integratord` daemon. A custom script on the **manager** parses each alert and posts it
+to the Telegram API; a `level 10` threshold in the `<integration>` block keeps routine noise
+off the phone while still delivering the SSH brute force (rule 5712) and my custom rule (100100).
+
+Getting it working was itself a string of instructive, very normal failures: the bundled Python
+lived at a different path than the default wrapper assumed; pasted heredocs kept writing shell
+commands into the script; Python indentation errors crept in from the editor; and — the classic
+— I first tried to use my **phone number** as the Telegram chat ID instead of the numeric chat
+ID from @userinfobot. Each was a quick fix once the error message was read carefully, which is
+the real lesson: the fix is almost always in the last line of the traceback.
+
+The end result: during a live `hydra` brute force, correlated alerts (rules 5712, 5551, 2502)
+arrived on my phone within seconds, each tagged to MITRE T1110.
+
+> _[Add your Telegram screenshot here — see `docs/screenshots/redacted/09-telegram-live-alerts.png`.]_
+
+## 6. Key takeaways
 
 - **Detection engineering is a loop, not a setting.** Attack → observe → read the raw event →
   write/tune a rule → validate → verify. Repeating that loop is the skill.
@@ -93,7 +112,7 @@ discipline, not just a lab trick.
 
 ---
 
-## 6. Next steps (roadmap)
+## 7. Next steps (roadmap)
 
 - Write more custom Linux rules: web-shell upload, directory scanning (repeated 404s),
   reverse-shell process spawn.

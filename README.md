@@ -14,6 +14,8 @@ to **MITRE ATT&CK** and common compliance frameworks.
 > This project was built hands-on from a bare Wazuh install. It is intended as a learning
 > portfolio piece and a reusable reference for anyone standing up their first detection lab.
 
+**Author:** Md Aman Bhuiyan — Security Engineer, Vivasoft Limited (Red Team & Bug Bounty background)
+
 ---
 
 ## Why this project exists
@@ -61,7 +63,7 @@ detection coverage for each one is measured and improved on the Wazuh side.
 > **Note on topology:** For a lab, the Manager, Indexer, and Dashboard are consolidated on a
 > single Kali host. In production these are typically separated across dedicated nodes.
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for detail.
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for detail.
 
 ---
 
@@ -100,18 +102,18 @@ sudo systemctl daemon-reload && sudo systemctl enable --now wazuh-agent
 Confirm the agent shows **Active** in the dashboard under **Agents**.
 
 ### 3. Vulnerable web app (DVWA)
-See [`config/dvwa-install-notes.md`](config/dvwa-install-notes.md) for the full Apache +
+See [`dvwa-install-notes.md`](dvwa-install-notes.md) for the full Apache +
 MariaDB + DVWA setup used in this lab.
 
 ### 4. Enable web-log monitoring on the agent
 Add the Apache access-log source to the agent config (excerpt in
-[`config/agent-ossec.conf.example`](config/agent-ossec.conf.example)), then restart the agent.
+[`agent-ossec.conf.example`](agent-ossec.conf.example)), then restart the agent.
 
 ### 5. Deploy custom detection rules (on the manager)
 Custom rules live on the **manager**, not the agent:
 ```bash
 # On Kali (manager)
-sudo cp rules/local_rules.xml /var/ossec/etc/rules/local_rules.xml
+sudo cp local_rules.xml /var/ossec/etc/rules/local_rules.xml
 sudo /var/ossec/bin/wazuh-logtest     # validate BEFORE restarting
 sudo systemctl restart wazuh-manager
 ```
@@ -121,9 +123,9 @@ sudo systemctl restart wazuh-manager
 ## Configuration highlights
 
 - **Agent log collection:** Linux auth log is monitored by default; the Apache access log
-  is added explicitly so web attacks become visible. See `config/agent-ossec.conf.example`.
+  is added explicitly so web attacks become visible. See `agent-ossec.conf.example`.
 - **Custom rules in the reserved range:** All custom rules use IDs `100000+` so they never
-  clash with Wazuh's built-in ruleset. See `rules/local_rules.xml`.
+  clash with Wazuh's built-in ruleset. See `local_rules.xml`.
 - **Safe iteration with `wazuh-logtest`:** Rules are validated against a sample log line
   before the manager is restarted, so a syntax error never takes the SIEM offline.
 
@@ -132,7 +134,7 @@ sudo systemctl restart wazuh-manager
 ## Usage examples (attack → detect)
 
 All attacks are launched from Kali against the lab agents. See
-[`scripts/attack-simulations.sh`](scripts/attack-simulations.sh).
+[`attack-simulations.sh`](attack-simulations.sh).
 
 ### SSH brute force
 ```bash
@@ -150,6 +152,20 @@ custom rule (below).
 
 ---
 
+## Real-time Telegram alerting
+
+High-severity detections are pushed to a Telegram bot in real time via Wazuh's
+`wazuh-integratord` daemon and a custom script on the manager. A `<level>10</level>` threshold
+keeps routine noise off the phone while still delivering the SSH brute force (rule 5712) and
+the custom path-traversal rule (100100).
+
+Live alerts during an SSH brute force against the Ubuntu agent (source IP and bot username
+redacted):
+
+![Telegram live alerts](docs/screenshots/redacted/09-telegram-live-alerts.png)
+
+Setup, scripts, and troubleshooting: [`integrations/README.md`](integrations/README.md).
+
 ## Key detections
 
 > Screenshots: _add your own exported event screenshots to `docs/screenshots/` and link
@@ -166,7 +182,7 @@ custom rule (below).
 **custom level-12 detection** (`100100`) that names the technique and embeds the attacker's
 source IP in the alert text — the core of detection engineering.
 
-See the custom rule in [`rules/local_rules.xml`](rules/local_rules.xml).
+See the custom rule in [`local_rules.xml`](local_rules.xml).
 
 ---
 
@@ -179,11 +195,13 @@ See the custom rule in [`rules/local_rules.xml`](rules/local_rules.xml).
 - **Networking first.** Agents and manager must share a reachable subnet; most "agent won't
   connect" issues are network-mode mismatches, not Wazuh.
 
-Full write-up: [`docs/LEARNING_SUMMARY.md`](docs/LEARNING_SUMMARY.md).
+Full write-up: [`LEARNING_SUMMARY.md`](LEARNING_SUMMARY.md).
 
 ---
 
 ## Roadmap
+
+- [x] **Real-time Telegram alerting** for level-10+ detections (see `integrations/`)
 
 - [ ] Add more custom Linux rules (web-shell upload, directory scanning / repeated 404s, reverse-shell process spawn)
 - [ ] Install **Sysmon** on the Windows agent and author a Windows detection (e.g. suspicious PowerShell download)
@@ -196,26 +214,31 @@ Full write-up: [`docs/LEARNING_SUMMARY.md`](docs/LEARNING_SUMMARY.md).
 
 ## Repository layout
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and the tree below:
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) and the tree below:
 
 ```
-wazuh-purple-team-lab/
+.
 ├── README.md
+├── ARCHITECTURE.md
 ├── LICENSE
 ├── CONTRIBUTING.md
 ├── .gitignore
-├── rules/
-│   └── local_rules.xml              # Custom detection rules (ID 100000+)
-├── config/
-│   ├── agent-ossec.conf.example     # Agent log-collection excerpt
-│   └── dvwa-install-notes.md        # Vulnerable web app setup
-├── scripts/
-│   └── attack-simulations.sh        # Reproducible attack commands
+├── LEARNING_SUMMARY.md
+├── Wazuh_Purple_Team_Lab_Learning_Summary.pdf
+├── agent-ossec.conf.example         # Agent log-collection excerpt
+├── attack-simulations.sh            # Reproducible attack commands
+├── dvwa-install-notes.md            # Vulnerable web app setup
+├── local_rules.xml                  # Custom detection rules (ID 100000+)
+├── integrations/
+│   ├── custom-telegram.py           # Wazuh -> Telegram alert script
+│   ├── custom-telegram              # Integrator wrapper
+│   ├── ossec-integration-snippet.xml # <integration> config block
+│   └── README.md                    # Telegram alerting setup + troubleshooting
 └── docs/
-    ├── ARCHITECTURE.md              # Topology + component detail
-    ├── LEARNING_SUMMARY.md          # What I learned (PDF-ready)
-    ├── LinkedIn_post.md             # Short post + caption
-    └── screenshots/                 # (add your dashboard screenshots here)
+    └── screenshots/
+        ├── README.md
+        └── redacted/
+            └── 09-telegram-live-alerts.png
 ```
 
 ---
@@ -230,6 +253,4 @@ shown here were performed against machines the author owns, inside a closed lab.
 
 ## License
 
-Released under the [MIT License](LICENSE).
-
-# Purple-Team-Lab-Wazuh-
+Released under the [MIT License](LICENSE) © 2026 Md Aman Bhuiyan.

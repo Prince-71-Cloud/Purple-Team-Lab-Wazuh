@@ -17,7 +17,7 @@
   <!-- Where this agent ships its telemetry -->
   <client>
     <server>
-      <address><MANAGER_IP></address>
+      <address>&lt;MANAGER_IP&gt;</address>
       <port>1514</port>
       <protocol>tcp</protocol>
     </server>
